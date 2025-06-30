@@ -1,0 +1,32 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome to webdavnext",
+    "section": "",
+    "text": "Interdisciplinary cooperation in data science projects requires smooth access to both code and data. However, in our world of heritage science we lack basic infrastructure to easily share data files that can be explored and used directly in Jupyter notebooks. Recently our lab has installed a Nextcloud server that gives our team the possibility to share project folders with data files. These can be accessed manually via a web interface, but also programmatically with the webdav protocol.\nWith webdavnext we want to learn how to smoothly share dynamic data directly in Jupyter notebooks via the webdav protocol…",
+    "crumbs": [
+      "Welcome to webdavnext"
+    ]
+  },
+  {
+    "objectID": "exploring-your-data.html",
+    "href": "exploring-your-data.html",
+    "title": "Exploring your data",
+    "section": "",
+    "text": "import webdav3\nfrom webdav3.client import Client\noptions = {\n 'webdav_hostname': \"https://laboppad.nl/remote.php/dav/files/asap-public-webdav\",\n 'webdav_login':    \"asap-public-webdav\",\n 'webdav_password': \"ASAP-READ-data\"\n}\nclient = Client(options)\nclient.list(remote_path='asap-data', get_info=True)\n\n[{'created': None,\n  'name': None,\n  'size': None,\n  'modified': 'Mon, 30 Jun 2025 14:24:52 GMT',\n  'etag': '\"68629e3404395\"',\n  'content_type': None,\n  'isdir': True,\n  'path': '/remote.php/dav/files/asap-public-webdav/asap-data/'},\n {'created': None,\n  'name': None,\n  'size': '3',\n  'modified': 'Mon, 30 Jun 2025 14:24:52 GMT',\n  'etag': '\"afc6240efe9f482e9db04b98be83f584\"',\n  'content_type': 'text/markdown',\n  'isdir': False,\n  'path': '/remote.php/dav/files/asap-public-webdav/asap-data/a-little-test.md'}]",
+    "crumbs": [
+      "Exploring your data"
+    ]
+  },
+  {
+    "objectID": "exploring-your-data.html#functions",
+    "href": "exploring-your-data.html#functions",
+    "title": "Exploring your data",
+    "section": "FUNCTIONS",
+    "text": "FUNCTIONS",
+    "crumbs": [
+      "Exploring your data"
+    ]
+  }
+]
