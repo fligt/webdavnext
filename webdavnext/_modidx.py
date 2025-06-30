@@ -5,4 +5,4 @@ d = { 'settings': { 'branch': 'master',
                 'doc_host': 'https://fligt.github.io',
                 'git_url': 'https://github.com/fligt/webdavnext',
                 'lib_path': 'webdavnext'},
-  'syms': {'webdavnext.core': {'webdavnext.core.foo': ('core.html#foo', 'webdavnext/core.py')}}}
+  'syms': {'webdavnext.core': {'webdavnext.core.foo': ('core.html#foo', 'webdavnext/core.py')}, 'webdavnext.webdav': {}}}
