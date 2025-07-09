@@ -5,4 +5,11 @@ d = { 'settings': { 'branch': 'master',
                 'doc_host': 'https://fligt.github.io',
                 'git_url': 'https://github.com/fligt/webdavnext',
                 'lib_path': 'webdavnext'},
-  'syms': {'webdavnext.core': {'webdavnext.core.foo': ('core.html#foo', 'webdavnext/core.py')}, 'webdavnext.webdav': {}}}
+  'syms': { 'webdavnext.core': {'webdavnext.core.foo': ('core.html#foo', 'webdavnext/core.py')},
+            'webdavnext.webdav': { 'webdavnext.webdav.RemoteData': ('exploring-your-remote-data.html#remotedata', 'webdavnext/webdav.py'),
+                                   'webdavnext.webdav.RemoteData.__init__': ( 'exploring-your-remote-data.html#remotedata.__init__',
+                                                                              'webdavnext/webdav.py'),
+                                   'webdavnext.webdav.RemoteData.download_selected': ( 'exploring-your-remote-data.html#remotedata.download_selected',
+                                                                                       'webdavnext/webdav.py'),
+                                   'webdavnext.webdav.download_selected': ( 'exploring-your-remote-data.html#download_selected',
+                                                                            'webdavnext/webdav.py')}}}
