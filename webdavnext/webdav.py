@@ -122,6 +122,6 @@ def download_selected(table, cache_dir=None):
                 now = int(time.time())
                 os.utime(local_path, (now, remote_modified_epoch_time)) 
                 
-    print(f'Ready with downloading selected remote data to local cache: \'{cache_dir}/{table.df['path'][0]}\'')
+    print(f'Ready with downloading selected remote data to local cache: {cache_dir}/{table.df['path'][0]}')
 
 
