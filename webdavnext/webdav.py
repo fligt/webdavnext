@@ -15,7 +15,8 @@ import os
 from pathlib import Path 
 import time
 from dateutil import parser as dateutil_parser
-import re
+import re 
+from IPython.display import HTML, display
 
 # %% ../notebooks/00_exploring-your-remote-data.ipynb 16
 class RemoteData(object): 
