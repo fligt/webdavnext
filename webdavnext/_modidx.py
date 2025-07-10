@@ -10,6 +10,4 @@ d = { 'settings': { 'branch': 'master',
                                    'webdavnext.webdav.RemoteData.__init__': ( 'exploring-your-remote-data.html#remotedata.__init__',
                                                                               'webdavnext/webdav.py'),
                                    'webdavnext.webdav.RemoteData.download_selected': ( 'exploring-your-remote-data.html#remotedata.download_selected',
-                                                                                       'webdavnext/webdav.py'),
-                                   'webdavnext.webdav.download_selected': ( 'exploring-your-remote-data.html#download_selected',
-                                                                            'webdavnext/webdav.py')}}}
+                                                                                       'webdavnext/webdav.py')}}}
