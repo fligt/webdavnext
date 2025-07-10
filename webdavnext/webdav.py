@@ -5,7 +5,7 @@
 # %% auto 0
 __all__ = ['RemoteData']
 
-# %% ../notebooks/00_exploring-your-remote-data.ipynb 15
+# %% ../notebooks/00_exploring-your-remote-data.ipynb 16
 from webdav3.client import Client
 import webdav3 
 import polars as pl 
@@ -18,7 +18,7 @@ from dateutil import parser as dateutil_parser
 import re 
 from IPython.display import HTML, display
 
-# %% ../notebooks/00_exploring-your-remote-data.ipynb 16
+# %% ../notebooks/00_exploring-your-remote-data.ipynb 17
 class RemoteData(object): 
     
     # Setting the `Depth` parameter to `infinity` is important to recursively list the file tree in one go. 
