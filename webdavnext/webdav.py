@@ -5,7 +5,7 @@
 # %% auto 0
 __all__ = ['RemoteData']
 
-# %% ../notebooks/00_exploring-your-remote-data.ipynb 16
+# %% ../notebooks/00_exploring-your-remote-data.ipynb 15
 from webdav3.client import Client
 import webdav3 
 import polars as pl 
@@ -18,7 +18,7 @@ from dateutil import parser as dateutil_parser
 import re 
 from IPython.display import HTML, display
 
-# %% ../notebooks/00_exploring-your-remote-data.ipynb 17
+# %% ../notebooks/00_exploring-your-remote-data.ipynb 16
 class RemoteData(object): 
     
     # Setting the `Depth` parameter to `infinity` is important to recursively list the file tree in one go. 
@@ -49,15 +49,15 @@ class RemoteData(object):
         df_full = pl.DataFrame(info)
 
         # keep relevant columns, remove path prefixes and add extensions column 
-        df = df_full[['path', 'size', 'content_type', 'modified', 'isdir']]
-        path_list = [path for path in list(df['path'])] 
+        self.df = df_full[['path', 'size', 'content_type', 'modified', 'isdir']]
+        path_list = [path for path in list(self.df['path'])] 
         ext_list = pl.DataFrame({'ext': [os.path.splitext(path)[1] for path in path_list]})
-        df = df.with_columns(ext_list['ext'].alias('ext'))
-        df = df.with_columns(pl.col('path').str.replace('/remote.php/dav/files/asap-public-webdav/', ''))
+        self.df = self.df.with_columns(ext_list['ext'].alias('ext'))
+        self.df = self.df.with_columns(pl.col('path').str.replace('/remote.php/dav/files/asap-public-webdav/', ''))
 
         # create interactive table 
         self.table = ITable(
-                    df,
+                    self.df,
                     layout={"top1": "searchBuilder"},
                     select=True,
                     searchBuilder={}, 
@@ -65,6 +65,8 @@ class RemoteData(object):
                 ) 
 
         print(f"Ready building file table for '{remote_path}', Total number of files and directories: {n_paths}   ")
+
+        
 
     
     def download_selected(self, cache_dir=None): 
