@@ -1,0 +1,32 @@
+[
+  {
+    "objectID": "exploring-your-remote-data.html",
+    "href": "exploring-your-remote-data.html",
+    "title": "Exploring your remote data in a breeze",
+    "section": "",
+    "text": "Let’s take a look at the data for a small research project that that I am currently working on with some of my colleagues in our lab. In this project we investigate the possibilities of a so-called ASAP probe that is coupled with High Resolution Mass Spectrometry. I created a dedicated project folder asap-data on our self hosted Nextcloud server and Wim just uploaded 60 files of various types. Now I am interested to take a closer look at the data! Which type of files did he upload? Can we take a look at some of them?\nWith our python package we can programmatically explore the contents of the cloud storage folder. Under the hood the webdavnext makes use of the amazingly powerful Python packages nc-py-api for communication with the cloud server, and polars, itables and anywidget and for creating interactive tables.\nNow in order the get started we need the configuration details to establish communication with our Nextcloud server. I have created a read-only account that you can try out yourselves:\nconfiguration = {\n    'nextcloud_url': \"https://laboppad.nl/\",\n    'nc_auth_user':    \"asap-public-webdav\",\n    'nc_auth_pass': \"ASAP-READ-data\", \n    'remote_path': 'asap-data'\n}\nTo get started you need to import the RemoteData class from the package.\nfrom webdavnext import RemoteData\n\n\n\n\n\n\n\n\n\n    \n        \n        \n        \n        \n        \n        \n        \n        \n    \n    \n   \n    \n      \n  \n        \n    \n    \n  \n        \n    \n    \n  \n        \n    \n      \n  \n        \n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n        \n    \n\n\nThis is the init_notebook_mode cell from ITables v2.4.4\n(you should not see this message - is your notebook trusted?)\nAnd instantiate it with the configuration dictionary. Depending on the amount of files in the cloud storage it might take some time to build the file table.\nremote_data = RemoteData(configuration)\n\nPlease wait while scanning all file paths in remote folder...\nReady building file table for 'asap-data', Total number of files and directories: 62\nWe can now have a look at the contents of the cloud folder using the RemoteData.table attribute.\nremote_data.table\nThis is the init_notebook_mode cell from ITables v2.4.3\n(you should not see this message - is your notebook trusted?)\n\n\n\n\n\n\n    \n    \n    \n        \n        \n        \n        \n        \n        \n        \n        \n    \n    \n   \n    \n      \n  \n        \n    \n    \n  \n        \n    \n    \n  \n        \n    \n      \n  \n        \n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n        \n    \n\n\n    Loading ITables v2.4.3 from the init_notebook_mode cell...\n    (need help?)\nWe can now filter and subsequently select rows by Shift and Ctrl clicking from this interactive table. Rows that are selected will be colored blue. These selected files can then be downloaded with the .download_selected() method onto your local machine into a local cache folder. Downloading is skipped if the selected files are already present locally.\nremote_data.download_selected()\n\nReady with downloading selected remote data to local cache: /home/frank/.cache/asap-data/",
+    "crumbs": [
+      "Exploring your remote data in a breeze"
+    ]
+  },
+  {
+    "objectID": "exploring-your-remote-data.html#functions",
+    "href": "exploring-your-remote-data.html#functions",
+    "title": "Exploring your remote data in a breeze",
+    "section": "FUNCTIONS",
+    "text": "FUNCTIONS\n\nsource\n\nRemoteData\n\n RemoteData (configuration)\n\nRecursively scan the contents of a remote webdav server as specified by configuration.\n\nsource\n\n\nnode_to_dataframe\n\n node_to_dataframe (fsnode)\n\nConvert fsnode object to polars a single row polars dataframe.",
+    "crumbs": [
+      "Exploring your remote data in a breeze"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome to webdavnext",
+    "section": "",
+    "text": "Interdisciplinary cooperation in data science projects requires smooth access to both code and data. However, in our world of heritage science we lack basic infrastructure to easily share data files that can be explored and used directly in Jupyter notebooks. Recently our lab has installed a Nextcloud server that gives our team the possibility to share project folders with data files. These can be accessed manually via a web interface, but also programmatically with the webdav protocol.\nWith webdavnext we want to learn how to smoothly share dynamic data directly in Jupyter notebooks via the webdav protocol…",
+    "crumbs": [
+      "Welcome to webdavnext"
+    ]
+  }
+]
