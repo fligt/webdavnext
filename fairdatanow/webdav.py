@@ -5,7 +5,8 @@
 # %% auto 0
 __all__ = ['node_to_dataframe', 'RemoteData']
 
-# %% ../notebooks/00_exploring-your-remote-data.ipynb 15
+# %% ../notebooks/00_exploring-your-remote-data.ipynb 16
+import nc_py_api 
 from nc_py_api import Nextcloud 
 
 #from webdav3.client import Client
@@ -21,7 +22,7 @@ from dateutil import parser as dateutil_parser
 import re 
 from IPython.display import HTML, display
 
-# %% ../notebooks/00_exploring-your-remote-data.ipynb 16
+# %% ../notebooks/00_exploring-your-remote-data.ipynb 17
 def node_to_dataframe(fsnode): 
     '''Convert `fsnode` object to polars a single row polars dataframe.'''
 
@@ -33,12 +34,10 @@ def node_to_dataframe(fsnode):
 
 class RemoteData(object): 
     
-    # Setting the `Depth` parameter to `infinity` is important to recursively list the file tree in one go. 
-    # See: http://webdav.org/specs/rfc4918.html#METHOD_PROPFIND
-
     
-    #Client.default_http_header['list'] = ['Accept: */*', 'Depth: infinity'] 
-
+    # See: https://help.nextcloud.com/t/using-nc-py-api-i-cant-download-any-file-due-to-ssl-certificte-verify-failed/194019 
+    nc_py_api.options.NPA_NC_CERT = False 
+    
     itables.options.maxBytes = 0
     itables.init_notebook_mode()
 
@@ -47,19 +46,16 @@ class RemoteData(object):
         '''
 
         options = configuration.copy()
-        remote_path = options.pop('remote_path')
+        self.remote_path = options.pop('remote_path')
 
         print(f'Please wait while scanning all file paths in remote folder...')
         
         # Nextcloud 
-        
         self.nc = Nextcloud(**options) 
 
         # query webdav server to obtain file listing 
-        fs_nodes_list = self.nc.files.listdir(remote_path, depth=-1, exclude_self=False) 
+        fs_nodes_list = self.nc.files.listdir(self.remote_path, depth=-1, exclude_self=False) 
         
-        #info = self.client.list(remote_path=remote_path, get_info=True)
-
         n_paths = len(fs_nodes_list)
 
         # load into polars 
@@ -69,17 +65,9 @@ class RemoteData(object):
 
         for fsnode in fs_nodes_list[1:]: 
             self.df.extend(node_to_dataframe(fsnode))
-        
-
-        # keep relevant columns, remove path prefixes and add extensions column 
-        #self.df = df_full[['path', 'size', 'content_type', 'modified', 'isdir']]
-        #path_list = [path for path in list(self.df['path'])] 
-        #ext_list = pl.DataFrame({'ext': [os.path.splitext(path)[1] for path in path_list]})
-        #self.df = self.df.with_columns(ext_list['ext'].alias('ext'))
-        #self.df = self.df.with_columns(pl.col('path').str.replace('/remote.php/dav/files/asap-public-webdav/', ''))
 
         # create interactive table 
-        self.table = ITable(
+        self.itable = ITable(
                     self.df,
                     layout={"top1": "searchBuilder"},
                     select=True,
@@ -87,7 +75,7 @@ class RemoteData(object):
                     scrollY="500px", scrollCollapse=True, paging=False, 
                 ) 
 
-        print(f"Ready building file table for '{remote_path}', Total number of files and directories: {n_paths}   ")
+        print(f"Ready building file table for '{self.remote_path}', Total number of files and directories: {n_paths}   ")
 
     
     def download_selected(self, cache_dir=None): 
@@ -100,9 +88,9 @@ class RemoteData(object):
         os.makedirs(cache_dir, exist_ok=True)
     
         # obtain remote paths and remote timestamps 
-        remote_path_list = [self.table.df['path'][n] for n in self.table.selected_rows]
-        remote_modified_list = [self.table.df['modified'][n] for n in self.table.selected_rows]
-        remote_isdir_list = [self.table.df['isdir'][n] for n in self.table.selected_rows]
+        remote_path_list = [self.itable.df['path'][n] for n in self.itable.selected_rows]
+        remote_modified_list = [self.itable.df['modified'][n] for n in self.itable.selected_rows]
+        remote_isdir_list = [self.itable.df['isdir'][n] for n in self.itable.selected_rows]
         
         n_files = len(remote_path_list)
        
@@ -116,29 +104,35 @@ class RemoteData(object):
                 # create directory structure inside cache 
                 os.makedirs(local_directory, exist_ok=True) 
             
-                # get remote epoch time 
-                remote_modified_epoch_time = int(dateutil_parser.parse(remote_modified).timestamp()) 
+                # get remote epoch time  
+                remote_modified_epoch_time = remote_modified.timestamp()
             
-                # infer local path 
+                # construct corresponding local path 
                 local_path = cache_dir.joinpath(remote_path) 
             
                 # check if local file exists and if modification times are similar 
                 is_local = local_path.exists()  
             
                 is_similar = False 
+                local_modified_epoch_time = None 
                 if is_local: 
-                    local_modified_epoch_time = int(os.stat(local_path).st_mtime)
-            
+                    local_modified_epoch_time = os.stat(local_path).st_mtime
                     if local_modified_epoch_time == remote_modified_epoch_time: 
                         is_similar = True 
-            
+                        
+                # download from nextcloud 
                 if not is_similar: 
-                    print(f'[{i}/{n_files - 1}] Downloading to: {local_path}                         ', end='\r')
-                    self.client.download(remote_path, local_path) 
-                
+                    print(f'[{i}/{n_files - 1}] Timestamps do no match: {remote_modified_epoch_time} vs {local_modified_epoch_time}', end='\r')
+                    print(f'[{i}/{n_files - 1}] Downloading to: {local_path}                                                       ' , end='\r')
+                      
+                    # write to cache 
+                    with open(local_path, 'bw') as fh: 
+                        self.nc.files.download2stream(remote_path, fh) 
+                        
+                    # adjust last modified timestamp 
                     now = int(time.time())
                     os.utime(local_path, (now, remote_modified_epoch_time)) 
                     
-        print(f"Ready with downloading selected remote data to local cache: {cache_dir}/{self.table.df['path'][0]}                                                                       ")
+        print(f"Ready with downloading {n_files} selected remote files to local cache: {cache_dir}/{self.remote_path}                                                                      ")
 
 
