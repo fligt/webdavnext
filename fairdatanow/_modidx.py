@@ -11,5 +11,5 @@ d = { 'settings': { 'branch': 'master',
                                                                                 'fairdatanow/webdav.py'),
                                     'fairdatanow.webdav.RemoteData.download_selected': ( 'exploring-your-remote-data.html#remotedata.download_selected',
                                                                                          'fairdatanow/webdav.py'),
-                                    'fairdatanow.webdav.node_to_dataframe': ( 'exploring-your-remote-data.html#node_to_dataframe',
-                                                                              'fairdatanow/webdav.py')}}}
+                                    'fairdatanow.webdav._node_to_dataframe': ( 'exploring-your-remote-data.html#_node_to_dataframe',
+                                                                               'fairdatanow/webdav.py')}}}
