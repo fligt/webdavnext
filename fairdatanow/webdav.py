@@ -30,10 +30,10 @@ def _node_to_dataframe(fsnode):
 
 class RemoteData(object): 
     
-    
     # See: https://help.nextcloud.com/t/using-nc-py-api-i-cant-download-any-file-due-to-ssl-certificte-verify-failed/194019 
     nc_py_api.options.NPA_NC_CERT = False 
     
+    # keep full dataframe 
     itables.options.maxBytes = 0
     itables.init_notebook_mode()
 
@@ -41,22 +41,23 @@ class RemoteData(object):
         '''Recursively scan the contents of a remote webdav server as specified by `configuration`. 
         '''
 
-        options = configuration.copy()
-        self.remote_path = options.pop('remote_path')
+        # parse configuration 
+        m = re.match('(^https://[^/]+/)(.*)', configuration['url'])
+        nextcloud_url, self.cache_dir = m.groups()
+        nc_auth_user = configuration['user']
+        nc_auth_pass = configuration['password'] 
 
         print(f'Please wait while scanning all file paths in remote folder...')
         
-        # Nextcloud 
-        self.nc = Nextcloud(**options) 
+        # Instantiate Nextcloud client 
+        self.nc = Nextcloud(nextcloud_url=nextcloud_url, nc_auth_user=nc_auth_user, nc_auth_pass=nc_auth_pass)
 
         # query webdav server to obtain file listing 
-        fs_nodes_list = self.nc.files.listdir(self.remote_path, depth=-1, exclude_self=False) 
+        fs_nodes_list = self.nc.files.listdir(depth=-1, exclude_self=False) 
         
         n_paths = len(fs_nodes_list)
 
-        # load into polars 
-
-        # initialize dataframe with first row to fix schema 
+        # initialize polars dataframe with first row to fix schema 
         self.df = _node_to_dataframe(fs_nodes_list[0])
 
         for fsnode in fs_nodes_list[1:]: 
@@ -71,17 +72,19 @@ class RemoteData(object):
                     scrollY="500px", scrollCollapse=True, paging=False, 
                 ) 
 
-        print(f"Ready building file table for '{self.remote_path}', Total number of files and directories: {n_paths}   ")
+        print(f"Ready building file table for '{self.cache_dir}', Total number of files and directories: {n_paths}   ")
 
     
     def download_selected(self, cache_dir=None): 
         '''Download selected files (blue rows) from `table` to local cache directory `cache_dir`.'''
         
-        # create cache directory 
+        # create cache path 
         if cache_dir is None: 
-            cache_dir = Path.home().joinpath('.cache')
+            cache_path = Path.home().joinpath('.cache', self.cache_dir)
+        else: 
+            cache_path = Path.home().joinpath('.cache', cache_dir)
     
-        os.makedirs(cache_dir, exist_ok=True)
+        os.makedirs(cache_path, exist_ok=True)
     
         # obtain remote paths and remote timestamps 
         remote_path_list = [self.itable.df['path'][n] for n in self.itable.selected_rows]
@@ -95,7 +98,7 @@ class RemoteData(object):
             # only download actual files 
             if not remote_isdir:   
                 remote_directory = os.path.dirname(remote_path)
-                local_directory = cache_dir.joinpath(remote_directory) # I guess this will not yet work for Windows
+                local_directory = cache_path.joinpath(remote_directory) # I guess this will not yet work for Windows
                 
                 # create directory structure inside cache 
                 os.makedirs(local_directory, exist_ok=True) 
@@ -104,7 +107,7 @@ class RemoteData(object):
                 remote_modified_epoch_time = remote_modified.timestamp()
             
                 # construct corresponding local path 
-                local_path = cache_dir.joinpath(remote_path) 
+                local_path = cache_path.joinpath(remote_path) 
             
                 # check if local file exists and if modification times are similar 
                 is_local = local_path.exists()  
@@ -129,6 +132,6 @@ class RemoteData(object):
                     now = int(time.time())
                     os.utime(local_path, (now, remote_modified_epoch_time)) 
                     
-        print(f"Ready with downloading {n_files} selected remote files to local cache: {cache_dir}/{self.remote_path}                                                                      ")
+        print(f"Ready with downloading {n_files} selected remote files to local cache: {local_path}                                                                      ")
 
 
