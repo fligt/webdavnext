@@ -9,6 +9,7 @@ __all__ = ['RemoteData']
 import nc_py_api 
 from nc_py_api import Nextcloud 
 
+import humanize
 import polars as pl 
 import itables
 from itables.widget import ITable
@@ -60,6 +61,10 @@ class RemoteData(object):
         # initialize polars dataframe with first row to fix schema 
         self.df = _node_to_dataframe(fs_nodes_list[0])
 
+        #sum the sizes to find the total storage space
+        total_size_bytes = self.df['size'].sum()
+        total_size = humanize.naturalsize(total_size_bytes)
+        
         for fsnode in fs_nodes_list[1:]: 
             self.df.extend(_node_to_dataframe(fsnode))
 
@@ -72,8 +77,9 @@ class RemoteData(object):
                     scrollY="500px", scrollCollapse=True, paging=False, 
                 ) 
 
-        print(f"Ready building file table for '{self.cache_dir}', Total number of files and directories: {n_paths}   ")
-
+        print(f"""Ready building file table for '{self.cache_dir}'
+        Total number of files and directories: {n_paths}
+        Total size of the files: {total_size}""")
     
     def download_selected(self, cache_dir=None): 
         '''Download selected files (blue rows) from `table` to local cache directory `cache_dir`.'''
