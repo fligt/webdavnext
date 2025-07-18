@@ -90,6 +90,9 @@ target/
 # pyenv
 .python-version
 
+# jupyter
+.jupyter
+
 # celery beat schedule file
 celerybeat-schedule
 
