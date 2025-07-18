@@ -92,6 +92,7 @@ target/
 
 # jupyter
 .jupyter
+.jupyter/
 
 # celery beat schedule file
 celerybeat-schedule
