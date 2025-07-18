@@ -86,13 +86,11 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+.jupyter/
 
 # pyenv
 .python-version
 
-# jupyter
-.jupyter
-.jupyter/
 
 # celery beat schedule file
 celerybeat-schedule

@@ -63,7 +63,7 @@ class RemoteData(object):
 
         #sum the sizes to find the total storage space
         total_size_bytes = self.df['size'].sum()
-        total_size = humanize.naturalsize(total_size_bytes)
+        total_size = humanize.naturalsize(total_size_bytes, True)
         
         for fsnode in fs_nodes_list[1:]: 
             self.df.extend(_node_to_dataframe(fsnode))
@@ -78,8 +78,8 @@ class RemoteData(object):
                 ) 
 
         print(f"""Ready building file table for '{self.cache_dir}'
-        Total number of files and directories: {n_paths}
-        Total size of the files: {total_size}""")
+Total number of files and directories: {n_paths}
+Total size of the files: {total_size}""")
     
     def download_selected(self, cache_dir=None): 
         '''Download selected files (blue rows) from `table` to local cache directory `cache_dir`.'''
