@@ -140,4 +140,33 @@ Total size of the files: {total_size}""")
                     
         print(f"Ready with downloading {n_files} selected remote files to local cache: {local_path}                                                                      ")
 
+    def download(self, remote_path, local_path, chunk_size='5Mb'):
+        return
 
+    def upload(self, remote_path, local_path, allow_edit=False, chunk_size='5Mb'):
+        ''''''
+
+        # check if user is overriding file information and if it's allowed
+        if (self.check_exist(remote_path)) and (not allow_edit):
+            print(f"There is already a file present at {remote_path}, allow overrides with allow_edit=True")
+            return
+
+        print(f"Starting upload to {remote_path}.")
+        
+        with open(local_path, 'br') as fp:
+            self.nc.files.upload_stream(remote_path, fp)
+
+        print(f"Upload to {remote_path} finished.")
+
+    #TODO: final check if upload needs to continue. Maybe check for file size before uploading?
+        
+    def delete(self, remote_path):
+        return
+
+    def check_exist(self, remote_path):
+        '''Checks the dataframe to see if the given path is already present.'''
+
+        # checks the path column and looks for any similarities with the remote_path
+        result = self.df['path'].is_in([remote_path]).any()
+        
+        return result
