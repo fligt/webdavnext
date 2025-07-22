@@ -144,24 +144,52 @@ Total size of the files: {total_size}""")
         return
 
     def upload(self, remote_path, local_path, allow_edit=False, chunk_size='5Mb'):
-        ''''''
+        '''Uploads a local file to the remote nextcloud storage. Use allow_edit to be able to override an existing file.'''
 
         # check if user is overriding file information and if it's allowed
         if (self.check_exist(remote_path)) and (not allow_edit):
             print(f"There is already a file present at {remote_path}, allow overrides with allow_edit=True")
             return
 
+        # get file size in bytes and make it human readable
+        file_size_bytes = os.path.getsize(local_path)
+        file_size = humanize.naturalsize(file_size_bytes, True)
+        
+        write = input(f"File size is {file_size} \nDo you want to continue the upload to {remote_path} [y/n]?.")
+
+        if write != 'y':
+            print("Upload aborted.")
+            return
+            
         print(f"Starting upload to {remote_path}.")
         
         with open(local_path, 'br') as fp:
-            self.nc.files.upload_stream(remote_path, fp)
+            fsnode = self.nc.files.upload_stream(remote_path, fp)
 
-        print(f"Upload to {remote_path} finished.")
-
-    #TODO: final check if upload needs to continue. Maybe check for file size before uploading?
+        # encountered problem with timezones
+        print(fsnode.info.last_modified)
+        # add new fsnode to df
+        #self.df.extend(_node_to_dataframe(fsnode))
         
+        print(f"Upload finished.")
+        
+        
+    
     def delete(self, remote_path):
-        return
+        '''Delete a file in the remote Nextcloud storage.'''
+
+        #TODO: Check if remote_path is an empty dir.
+        
+        write = input(f"Are you sure you want to delete {remote_path} [y/n]?")
+        if write != 'y':
+            print("Deletion aborted.")
+            return
+        
+        self.nc.files.delete(remote_path)
+
+        #TODO: REMOVE FILE FROM DF
+        
+        print("File removed.")
 
     def check_exist(self, remote_path):
         '''Checks the dataframe to see if the given path is already present.'''
