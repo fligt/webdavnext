@@ -28,7 +28,6 @@ def _node_to_dataframe(fsnode):
 
     return df 
 
-
 class RemoteData(object): 
     
     # See: https://help.nextcloud.com/t/using-nc-py-api-i-cant-download-any-file-due-to-ssl-certificte-verify-failed/194019 
@@ -164,12 +163,14 @@ Total size of the files: {total_size}""")
         print(f"Starting upload to {remote_path}.")
         
         with open(local_path, 'br') as fp:
-            fsnode = self.nc.files.upload_stream(remote_path, fp)
+            self.nc.files.upload_stream(remote_path, fp)
 
-        # encountered problem with timezones
-        print(fsnode.info.last_modified)
-        # add new fsnode to df
-        #self.df.extend(_node_to_dataframe(fsnode))
+        # search for the newly created fsnode and add to the dataframe
+        remote_dir, remote_file = os.path.split(remote_path)
+        fsnode = self.nc.files.find(['eq', 'name', remote_file], remote_dir)[0]
+        
+        self.df.extend(_node_to_dataframe(fsnode))
+        self._reload_itable()
         
         print(f"Upload finished.")
         
@@ -198,3 +199,6 @@ Total size of the files: {total_size}""")
         result = self.df['path'].is_in([remote_path]).any()
         
         return result
+
+    def _reload_itable(self):
+        self.itable.df = self.df
