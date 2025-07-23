@@ -140,6 +140,7 @@ Total size of the files: {total_size}""")
         print(f"Ready with downloading {n_files} selected remote files to local cache: {local_path}                                                                      ")
 
     def download(self, remote_path, local_path, chunk_size='5Mb'):
+        #TODO: refactor download to this function
         return
 
     def upload(self, remote_path, local_path, allow_edit=False, chunk_size='5Mb'):
@@ -185,11 +186,16 @@ Total size of the files: {total_size}""")
         if write != 'y':
             print("Deletion aborted.")
             return
+            
+        # search for the newly created fsnode and delete from the dataframe
+        remote_dir, remote_file = os.path.split(remote_path)
+        fsnode = self.nc.files.find(['eq', 'name', remote_file], remote_dir)[0]
         
         self.nc.files.delete(remote_path)
+    
+        self.df = self.df.filter(pl.col("path") != fsnode.user_path)
+        self._reload_itable()
 
-        #TODO: REMOVE FILE FROM DF
-        
         print("File removed.")
 
     def check_exist(self, remote_path):
@@ -201,4 +207,5 @@ Total size of the files: {total_size}""")
         return result
 
     def _reload_itable(self):
+        '''Reloads the dataframe stored in the itable object'''
         self.itable.df = self.df
