@@ -9,6 +9,7 @@ __all__ = ['RemoteData']
 import nc_py_api 
 from nc_py_api import Nextcloud 
 
+import humanize
 import polars as pl 
 import itables
 from itables.widget import ITable
@@ -16,7 +17,7 @@ import os
 from pathlib import Path 
 import time 
 import re 
-from IPython.display import HTML, display 
+from IPython.display import HTML, display
 
 # %% ../notebooks/10_exploring-your-remote-data.ipynb 20
 def _node_to_dataframe(fsnode): 
@@ -26,7 +27,6 @@ def _node_to_dataframe(fsnode):
                    'isdir': fsnode.is_dir, 'ext': os.path.splitext(fsnode.user_path)[1]})
 
     return df 
-
 
 class RemoteData(object): 
     
@@ -60,6 +60,10 @@ class RemoteData(object):
         # initialize polars dataframe with first row to fix schema 
         self.df = _node_to_dataframe(fs_nodes_list[0])
 
+        #sum the sizes to find the total storage space
+        total_size_bytes = self.df['size'].sum()
+        total_size = humanize.naturalsize(total_size_bytes, True)
+        
         for fsnode in fs_nodes_list[1:]: 
             self.df.extend(_node_to_dataframe(fsnode))
 
@@ -72,8 +76,9 @@ class RemoteData(object):
                     scrollY="500px", scrollCollapse=True, paging=False, 
                 ) 
 
-        print(f"Ready building file table for '{self.cache_dir}', Total number of files and directories: {n_paths}   ")
-
+        print(f"Ready building file table for '{self.cache_dir}'")
+        print(f'Total number of files and directories: {n_paths}')
+        print(f'Total size of the files: {total_size}')
     
     def download_selected(self, cache_dir=None): 
         '''Download selected files (blue rows) from `table` to default local cache directory. 
@@ -134,6 +139,80 @@ class RemoteData(object):
                     now = int(time.time())
                     os.utime(local_path, (now, remote_modified_epoch_time)) 
                     
-        print(f"Ready with downloading {n_files} selected remote files to local cache: {cache_path}                                                                      ")
+        print(f"Ready with downloading {n_files} selected remote files to local cache: {local_path}                                                                      ")
+
+    def download(self, remote_path, local_path, chunk_size='5Mb'):
+        #TODO: refactor download to this function
+        return
+
+    def upload(self, remote_path, local_path, allow_edit=False, chunk_size='5Mb'):
+        '''Uploads a local file to the remote nextcloud storage. Use allow_edit to be able to override an existing file.'''
+
+        # check if user is overriding file information and if it's allowed
+        if (self.check_exist(remote_path)) and (not allow_edit):
+            print(f"There is already a file present at {remote_path}, allow overrides with allow_edit=True")
+            return
+
+        # get file size in bytes and make it human readable
+        file_size_bytes = os.path.getsize(local_path)
+        file_size = humanize.naturalsize(file_size_bytes, True)
+        
+        write = input(f"File size is {file_size} \nDo you want to continue the upload to {remote_path} [y/n]?.")
+
+        if write != 'y':
+            print("Upload aborted.")
+            return
+            
+        print(f"Starting upload to {remote_path}.")
+        
+        with open(local_path, 'br') as fp:
+            self.nc.files.upload_stream(remote_path, fp)
+
+        # search for the newly created fsnode and add to the dataframe
+        remote_dir, remote_file = os.path.split(remote_path)
+        fsnode = self.nc.files.find(['eq', 'name', remote_file], remote_dir)[0]
+        
+        self.df.extend(_node_to_dataframe(fsnode))
+        self._reload_itable()
+        
+        print(f"Upload finished.")
+        
+        
+    
+    def delete(self, remote_path):
+        '''Delete a file in the remote Nextcloud storage.'''
+
+        #TODO: Check if remote_path is an empty dir.
+        
+        write = input(f"Are you sure you want to delete {remote_path} [y/n]?")
+        if write != 'y':
+            print("Deletion aborted.")
+            return
+            
+        # search for the newly created fsnode and delete from the dataframe
+        remote_dir, remote_file = os.path.split(remote_path)
+        fsnode = self.nc.files.find(['eq', 'name', remote_file], remote_dir)[0]
+        
+        self.nc.files.delete(remote_path)
+    
+        self.df = self.df.filter(pl.col("path") != fsnode.user_path)
+        self._reload_itable()
+
+        print("File removed.")
+
+    def check_exist(self, remote_path):
+        '''Checks the dataframe to see if the given path is already present.'''
+
+        # checks the path column and looks for any similarities with the remote_path
+        result = self.df['path'].is_in([remote_path]).any()
+        
+        return result
+
+    def _reload_itable(self):
+        '''Reloads the dataframe stored in the itable object'''
+        self.itable.df = self.df
+
+
+
 
 
