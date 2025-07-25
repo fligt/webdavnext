@@ -94,6 +94,7 @@ class RemoteData(object):
         os.makedirs(cache_path, exist_ok=True)
     
         # obtain remote paths and remote timestamps 
+        local_path_list = []
         remote_path_list = [self.itable.df['path'][n] for n in self.itable.selected_rows]
         remote_modified_list = [self.itable.df['modified'][n] for n in self.itable.selected_rows]
         remote_isdir_list = [self.itable.df['isdir'][n] for n in self.itable.selected_rows]
@@ -115,6 +116,8 @@ class RemoteData(object):
             
                 # construct corresponding local path 
                 local_path = cache_path.joinpath(remote_path) 
+                local_path_list.append(local_path)
+                
             
                 # check if local file exists and if modification times are similar 
                 is_local = local_path.exists()  
@@ -140,6 +143,8 @@ class RemoteData(object):
                     os.utime(local_path, (now, remote_modified_epoch_time)) 
                     
         print(f"Ready with downloading {n_files} selected remote files to local cache: {local_path}                                                                      ")
+
+        return local_path_list
 
     def download(self, remote_path, local_path, chunk_size='5Mb'):
         #TODO: refactor download to this function
