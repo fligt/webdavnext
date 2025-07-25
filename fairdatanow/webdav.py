@@ -5,7 +5,7 @@
 # %% auto 0
 __all__ = ['RemoteData']
 
-# %% ../notebooks/10_exploring-your-remote-data.ipynb 19
+# %% ../notebooks/10_exploring-your-remote-data.ipynb 18
 import nc_py_api 
 from nc_py_api import Nextcloud 
 
@@ -19,7 +19,7 @@ import time
 import re 
 from IPython.display import HTML, display
 
-# %% ../notebooks/10_exploring-your-remote-data.ipynb 20
+# %% ../notebooks/10_exploring-your-remote-data.ipynb 19
 def _node_to_dataframe(fsnode): 
     '''Convert `fsnode` object to polars a single row polars dataframe.'''
 
@@ -37,7 +37,7 @@ class RemoteData(object):
     itables.options.maxBytes = 0
     itables.init_notebook_mode()
 
-    def __init__(self, configuration, searchBuilder={}): 
+    def __init__(self, configuration, search_regex='', searchBuilder={}): 
         '''Recursively scan the contents of a remote webdav server as specified by `configuration`. 
         '''
 
@@ -46,6 +46,8 @@ class RemoteData(object):
         nextcloud_url, self.cache_dir = m.groups()
         nc_auth_user = configuration['user']
         nc_auth_pass = configuration['password'] 
+        
+        
 
         print(f'Please wait while scanning all file paths in remote folder...')
         
@@ -72,6 +74,7 @@ class RemoteData(object):
                     self.df,
                     layout={"top1": "searchBuilder"},
                     select=True,
+                    search={"regex": True, "caseInsensitive": True, "search": search_regex},  
                     searchBuilder=searchBuilder, 
                     scrollY="500px", scrollCollapse=True, paging=False, 
                 ) 
@@ -116,7 +119,7 @@ class RemoteData(object):
             
                 # construct corresponding local path 
                 local_path = cache_path.joinpath(remote_path) 
-                local_path_list.append(local_path)
+                local_path_list.append(str(local_path))
                 
             
                 # check if local file exists and if modification times are similar 
