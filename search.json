@@ -1,0 +1,42 @@
+[
+  {
+    "objectID": "getting-started.html",
+    "href": "getting-started.html",
+    "title": "Getting started with Python",
+    "section": "",
+    "text": "In order to make full use of fairdatanow you need to be able to install Python packages and run Python code in Jupyter notebooks on your computer. The quickest and easiest way to get started with Jupyter notebooks is by downloading and installing the JupyterLab Desktop (JLD) installer for your operating system from the official github repository.\n\n\n\n\n\n\n\nNote\n\n\n\nThe first time you start JupyterLab Desktop you additionally need to install the default Python environment from the start menu. To do so you need to hoover and click on the word ‘install’ on the bottom of the start up screen.\n\n\nFinally you can install or update (with the -U option) the fairdatanow package from the Python Package index pypi.org by executing this command from a code cell in a Jupyter notebook:\n%pip install -U fairdatanow \nFor more information about JupyterLab Desktop see the JLD user guide.\nThat is it! You now are ready to open up your explore (y)our Nextcloud data for your project.",
+    "crumbs": [
+      "Getting started with Python"
+    ]
+  },
+  {
+    "objectID": "exploring-your-remote-data.html",
+    "href": "exploring-your-remote-data.html",
+    "title": "Exploring your remote data in a breeze",
+    "section": "",
+    "text": "In order to to make use of fairdatanow, you will need a Nextcloud server url, a user name and a password to access a folder on a Nextcloud server. The recommended way to use these credentials in Jupyter notebooks is to store username and password as environment variables on your system. You can retrieve them with the os.getenv() function.\nimport os\nconfiguration = {\n    'url': \"https://laboppad.nl/falnama-project/OPENDATA\",\n    'user':    os.getenv('NC_AUTH_USER'),\n    'password': os.getenv('NC_AUTH_PASS')\n}\nTo get started you need to import the RemoteData class from the package.\nfrom fairdatanow import RemoteData\n\n\n\n\n\n\n\n\n\n    \n        \n        \n        \n        \n        \n        \n        \n        \n    \n    \n   \n    \n      \n  \n        \n    \n    \n  \n        \n    \n    \n  \n        \n    \n      \n  \n        \n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n        \n    \n\n\nThis is the init_notebook_mode cell from ITables v2.4.4\n(you should not see this message - is your notebook trusted?)\nAnd instantiate it with the configuration dictionary. Depending on the amount of files in the cloud storage it might take some time to build the interactive file table. If you know already for which files you are looking, you can provide an optional regular expression search string search_regex= as an argument. You can adapt this search string in the interactive table to obtain another filtering.\nremote_data = RemoteData(configuration, search_regex='WM-71803-08')\n\nPlease wait while scanning all file paths in remote folder...\nReady building file table for 'falnama-project/OPENDATA'\nTotal number of files and directories: 373\nTotal size of the files: 57.3 GiB\nWe can now have a look at the contents of the cloud folder using the RemoteData.itable attribute. This will create an interactive table.\nremote_data.itable\nThis is the init_notebook_mode cell from ITables v2.4.3\n(you should not see this message - is your notebook trusted?)\n\n\n\n\n\n\n    \n    \n    \n        \n        \n        \n        \n        \n        \n        \n        \n    \n    \n   \n    \n      \n  \n        \n    \n    \n  \n        \n    \n    \n  \n        \n    \n      \n  \n        \n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n\n            \n                \n                \n            \n        \n    \n\n\n    Loading ITables v2.4.3 from the init_notebook_mode cell...\n    (need help?)\nWe can now filter and subsequently select rows by Shift and Ctrl clicking from this interactive table. Rows that are selected will be colored blue. These selected files can then be downloaded with the .download_selected() method onto your local machine into a local cache folder. Downloading is skipped if the selected files are already present locally.\nlocal_path_list = remote_data.download_selected()\n\nReady with downloading 1 selected remote files to local cache: /home/frank/.cache/fairdatanow/falnama-project/OPENDATA/maxrf/element-maps/WM-71803-08_250_300_50/WM-71803-08_250_300_50_Cu.png\nNow I am curious to take a look at the data! If you are curious too, read the next section…",
+    "crumbs": [
+      "Exploring your remote data in a breeze"
+    ]
+  },
+  {
+    "objectID": "exploring-your-remote-data.html#functions",
+    "href": "exploring-your-remote-data.html#functions",
+    "title": "Exploring your remote data in a breeze",
+    "section": "FUNCTIONS",
+    "text": "FUNCTIONS\n\nsource\n\nRemoteData\n\n RemoteData (configuration, search_regex='', searchBuilder={})\n\nRecursively scan the contents of a remote webdav server as specified by configuration.",
+    "crumbs": [
+      "Exploring your remote data in a breeze"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome to fairdatanow",
+    "section": "",
+    "text": "Effective interdisciplinary cooperation in data science projects requires smooth access to both data and code. And with the recent development of two amazing open source frameworks (self hosted Nextcloud for data storage and Jupyter notebooks for computing), we are now in a position to actually make this happen. Recently our lab (the Rijkserfgoedlaboratorium in Amsterdam) has installed a Nextcloud server that gives our lab the possibility to share data files organized in project folders with research partners. These can be accessed manually via a web interface, but also programmatically with the webdav protocol! With fairdatanow we want to learn how to easily find en download data files from a Nextcloud storage directly in Jupyter notebooks in order to explore them and create visualizations.\nUnder the hood the fairdatanow makes use of the Nextcloud Python Framework nc-py-api for communication with the cloud server, and the powerful Python packages polars, itables and anywidget and for creating interactive tables.\nAlthough the package is still under construction it is already available for installation from the python package index.",
+    "crumbs": [
+      "Welcome to fairdatanow"
+    ]
+  }
+]
